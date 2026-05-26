@@ -298,7 +298,40 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 - ✅ Reglas .htaccess: YA APLICADAS en .htaccess root (líneas 11-90)
 - ⏳ Pendiente: Verificar si también están en staging remoto
 
-### 5. Limpieza y Optimización del Repositorio Git
+### 5. Actualizaciones de Seguridad y Mantenimiento Core
+
+**WordPress Core Update: 6.9.4 → 7.0**
+
+**Fecha:** 26 de Mayo de 2026  
+**Tipo:** Major release  
+**Base de Datos:** Upgraded de versión 60717 → 61833
+
+**Plugins Actualizados (10):**
+
+| Plugin | Versión Anterior | Versión Nueva | Tipo |
+|--------|------------------|---------------|------|
+| **Akismet Anti-spam** | v5.6 | v5.7 | Seguridad |
+| **Contact Form 7** | v6.1.5 | v6.1.6 | Bugfix |
+| **Elementor** | v4.0.2 | v4.1.0 | Minor (features) |
+| **Joinchat (creame-whatsapp-me)** | v6.1.3 | v6.2.3 | Minor |
+| **Kirki Customizer Framework** | v5.2.3 | v6.0.9 | Major |
+| **MC4WP: Mailchimp for WordPress** | v4.12.1 | v4.12.6 | Bugfix |
+| **Meta Box** | v5.11.4 | v5.12.0 | Minor |
+| **Google Site Kit** | v1.176.0 | v1.179.0 | Minor |
+| **UpdraftPlus** | v1.26.2 | v1.26.4 | Seguridad |
+| **WP Engine Site Migration** | v1.7.1 | v1.8.1 | Minor |
+
+**Temas Actualizados (1):**
+- Twenty Twenty-Five: v1.4 → v1.5
+
+**Método:** WP-CLI en entorno local  
+**Downtime:** Cero (maintenance mode automático)  
+**Resultado:** ✅ Success - 10 de 10 plugins, 1 de 1 tema, core sin errores
+
+**Nota Importante - WordPress 7.0:**
+Major release de WordPress. Se recomienda testing exhaustivo en staging antes de aplicar en producción. Cambios mayores pueden incluir actualizaciones de Gutenberg, API REST, y core functionality.
+
+### 6. Limpieza y Optimización del Repositorio Git
 
 **Problema Detectado:**
 El comando `pull-code-stg` ejecutado antes de la sesión trajo CIENTOS de archivos que no deberían estar versionados:
@@ -362,25 +395,27 @@ El comando `pull-code-stg` ejecutado antes de la sesión trajo CIENTOS de archiv
 
 ## Estado de Plugins Actualizado
 
-**Plugins Mantenidos Activos:**
-- Akismet Anti-spam v5.6
-- Contact Form 7 v6.1.5
-- Elementor v4.0.2
-- **Joinchat (creame-whatsapp-me) v6.1.3** ← Decisión arquitectural
-- Kirki v5.2.3
+**Plugins Mantenidos Activos (Actualizados 26/05/2026):**
+- Akismet Anti-spam v5.7 ← Actualizado
+- Contact Form 7 v6.1.6 ← Actualizado
+- Elementor v4.1.0 ← Actualizado (minor release)
+- **Joinchat (creame-whatsapp-me) v6.2.3** ← Actualizado, decisión arquitectural mantener
+- Kirki v6.0.9 ← Actualizado (major release)
 - Marker.io v1.2.2
-- MC4WP Mailchimp v4.12.1
-- Meta Box v5.11.4 (reinstalación limpia)
-- Google Site Kit v1.176.0
-- UpdraftPlus v1.26.2
-- WP Engine Site Migration v1.7.1
+- MC4WP Mailchimp v4.12.6 ← Actualizado
+- Meta Box v5.12.0 ← Actualizado
+- Google Site Kit v1.179.0 ← Actualizado
+- UpdraftPlus v1.26.4 ← Actualizado (parche seguridad)
+- WP Engine Site Migration v1.8.1 ← Actualizado
 - WP Mail SMTP Pro v4.8.0
 - Zoho Campaigns v2.1.7
 
 **Plugins Desactivados:**
 - ❌ **Goolytics v1.1.3** (26/05/2026) - Reemplazado por código custom
 
-**Total de Plugins Activos:** 17 (antes: 18)
+**Total de Plugins Activos:** 17 (antes: 18)  
+**WordPress Core:** v7.0 (actualizado de v6.9.4)  
+**Database Version:** 61833 (actualizado de 60717)
 
 ---
 
@@ -462,6 +497,18 @@ El comando `pull-code-stg` ejecutado antes de la sesión trajo CIENTOS de archiv
 
 ## Tareas Pendientes de Finalización
 
+### Sincronización con Staging
+
+- [ ] Aplicar actualizaciones a staging:
+  - WordPress 7.0 core update
+  - 10 plugins actualizados
+  - Database upgrade (wp core update-db)
+- [ ] Testing exhaustivo en staging post-actualización:
+  - Verificar Elementor 4.1.0 (breaking changes posibles)
+  - Verificar Kirki 6.0.9 (major release)
+  - Smoke test completo de funcionalidades críticas
+  - Verificar forms, tracking, WhatsApp, security headers
+
 ### Verificaciones Pre-Producción
 
 - [ ] Confirmar IDs de GA/GTM con **Andrés Bolani** (dev)
@@ -525,6 +572,25 @@ Las siguientes tareas de prioridad alta continúan bloqueadas desde Abril por fa
 ---
 
 ## Métricas de Impacto
+
+### Actualizaciones de Software
+
+| Componente | Versión Anterior | Versión Actual | Tipo de Actualización |
+|------------|------------------|----------------|----------------------|
+| **WordPress Core** | 6.9.4 | 7.0 | 🔴 Major Release |
+| **Base de Datos** | 60717 | 61833 | Upgrade automático |
+| **Akismet** | 5.6 | 5.7 | Seguridad |
+| **Contact Form 7** | 6.1.5 | 6.1.6 | Bugfix |
+| **Elementor** | 4.0.2 | 4.1.0 | Minor (features) |
+| **Joinchat** | 6.1.3 | 6.2.3 | Minor |
+| **Kirki** | 5.2.3 | 6.0.9 | 🔴 Major Release |
+| **MC4WP** | 4.12.1 | 4.12.6 | Bugfix |
+| **Meta Box** | 5.11.4 | 5.12.0 | Minor |
+| **Site Kit** | 1.176.0 | 1.179.0 | Minor |
+| **UpdraftPlus** | 1.26.2 | 1.26.4 | Seguridad |
+| **WP Engine Migration** | 1.7.1 | 1.8.1 | Minor |
+
+**Total:** 10 plugins + 1 tema + WordPress core actualizados exitosamente
 
 ### Optimización de Código
 
@@ -632,7 +698,9 @@ Durante los meses de Abril y Mayo 2026, se completó exitosamente un ciclo compl
 
 **Logros Principales:**
 - ✅ Entorno de staging operativo y funcional en WP Engine
-- ✅ 13 plugins críticos actualizados sin incidencias
+- ✅ 13 plugins críticos actualizados sin incidencias (Abril)
+- ✅ **10 plugins + WordPress 7.0 actualizados (Mayo)**
+- ✅ **2 major releases aplicados: WordPress 7.0 + Kirki 6.0.9**
 - ✅ Problema de Meta Box diagnosticado y resuelto definitivamente
 - ✅ Cloudflare Turnstile integrado como reemplazo de reCAPTCHA
 - ✅ Títulos SEO corregidos eliminando "Engitech" en páginas clave
