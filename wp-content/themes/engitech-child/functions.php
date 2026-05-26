@@ -215,9 +215,9 @@ add_action( 'wp_body_open', 'vertexray_gtm_noscript', 1 );
  */
 function vertexray_whatsapp_button() {
     // Número de WhatsApp (formato internacional sin +, espacios ni guiones)
-    // TODO: VERIFICAR Y ACTUALIZAR con el número correcto de Vertex Ray
-    // Obtener del plugin Joinchat actual o consultar con el cliente
-    $whatsapp_number = '5491153840067'; // ⚠️ PLACEHOLDER - Actualizar antes de deploy
+    // NOTA: Número obtenido de producción (59892250103)
+    // TODO: Confirmar con Andrés Bolani que es el número correcto
+    $whatsapp_number = '59892250103'; // Uruguay +598 9225 0103
     
     // Mensaje predeterminado (opcional)
     $default_message = 'Hello! I\'m interested in your services';

@@ -40,13 +40,23 @@
 ## ⏳ PENDIENTE DE FINALIZACIÓN
 
 ### 1. Configuración Pre-Deploy (CRÍTICO)
-- [ ] Obtener número de WhatsApp correcto del cliente
-- [ ] Actualizar línea 228 de functions.php
-- [ ] Verificar IDs de GA/GTM en admin console
-- [ ] Actualizar líneas 139-140 si es necesario
+
+#### ⚠️ VERIFICACIONES PENDIENTES CON ANDRÉS BOLANI:
+- [ ] **WhatsApp:** Confirmar que `59892250103` (Uruguay) es el número correcto
+  - **Estado actual:** Actualizado a `59892250103` obtenido de producción
+  - **Ubicación:** functions.php línea ~220
+  - **Contacto:** Andrés Bolani (dev)
+  
+- [ ] **IDs de Tracking GA/GTM:** Confirmar `UA-2468946-1` y `GTM-NPL5XMZ`
+  - **Estado actual:** Usando IDs extraídos de header.php hardcodeado
+  - **Ubicación:** functions.php líneas ~157-158
+  - **Ambigüedad detectada:** Site Kit plugin instalado (posibles IDs alternativos)
+  - **Verificación necesaria:** Revisar Google Analytics/GTM admin console
+  - **Contacto:** Andrés Bolani (dev)
 
 ### 2. Deploy a Staging
 - [x] Código subido con ameba-deploy ✅ (26/05/2026 confirmado por usuario)
+- [x] WhatsApp actualizado a 59892250103 ✅ (26/05/2026)
 - [ ] Reglas .htaccess agregadas vía script
 - [ ] Verificar archivos en servidor
 
