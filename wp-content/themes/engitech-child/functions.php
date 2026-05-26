@@ -219,8 +219,8 @@ function vertexray_whatsapp_button() {
     // TODO: Confirmar con Andrés Bolani que es el número correcto
     $whatsapp_number = '59892250103'; // Uruguay +598 9225 0103
     
-    // Mensaje predeterminado (opcional)
-    $default_message = 'Hello! I\'m interested in your services';
+    // Mensaje predeterminado (español)
+    $default_message = 'Hola! Quería más información';
     
     // URL de WhatsApp
     $whatsapp_url = 'https://wa.me/' . esc_attr( $whatsapp_number );
