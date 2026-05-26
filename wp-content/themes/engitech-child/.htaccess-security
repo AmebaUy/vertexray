@@ -1,0 +1,106 @@
+# ============================================================================
+# VERTEX RAY - REGLAS DE SEGURIDAD ADICIONALES PARA .HTACCESS
+# ============================================================================
+# Estas reglas deben AÑADIRSE al archivo .htaccess principal en la raíz de WordPress
+# NO reemplazar el .htaccess existente, sino agregar estas reglas al final
+# ============================================================================
+
+# Bloquear acceso a xmlrpc.php
+<Files xmlrpc.php>
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Proteger wp-config.php
+<Files wp-config.php>
+    Order Allow,Deny
+    Deny from all
+</Files>
+
+# Proteger archivos sensibles
+<FilesMatch "^(readme\.html|readme\.txt|license\.txt|wp-config-sample\.php|debug\.log|error_log)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Deshabilitar listado de directorios
+Options -Indexes
+
+# Proteger .htaccess y archivos ocultos
+<FilesMatch "^\.">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Prevenir ejecución de PHP en uploads
+<Directory "wp-content/uploads">
+    <FilesMatch "\.php$">
+        Order Allow,Deny
+        Deny from all
+    </FilesMatch>
+</Directory>
+
+# Limitar métodos HTTP a solo GET, POST, HEAD
+<LimitExcept GET POST HEAD>
+    Order Allow,Deny
+    Deny from all
+</LimitExcept>
+
+# Bloquear escaneo de vulnerabilidades comunes
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Bloquear acceso a archivos PHP en wp-includes
+    RewriteRule ^wp-includes/[^/]+\.php$ - [F,L]
+    
+    # Bloquear acceso a readme, changelog y archivos de instalación
+    RewriteRule ^(readme|changelog|install|upgrade)\.php$ - [F,L]
+    
+    # Proteger contra inyección de scripts en URL
+    RewriteCond %{QUERY_STRING} (\<|%3C).*script.*(\>|%3E) [NC,OR]
+    RewriteCond %{QUERY_STRING} GLOBALS(=|\[|\%[0-9A-Z]{0,2}) [OR]
+    RewriteCond %{QUERY_STRING} _REQUEST(=|\[|\%[0-9A-Z]{0,2})
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Bloquear inyección SQL básica
+    RewriteCond %{QUERY_STRING} (union.*select|insert.*into|delete.*from|drop.*table) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Proteger contra path traversal
+    RewriteCond %{QUERY_STRING} \.\.\/ [NC,OR]
+    RewriteCond %{QUERY_STRING} \.(bash|git|hg|log|svn|swp|cvs) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+    
+    # Bloquear user-agents maliciosos conocidos
+    RewriteCond %{HTTP_USER_AGENT} (libwww-perl|wget|python|nikto|curl|scan|java|winhttp|clshttp|loader) [NC,OR]
+    RewriteCond %{HTTP_USER_AGENT} (libwww-perl|wget|python|nikto|curl|scan|java|winhttp|HTTrack|clshttp|archiver|loader|email|harvest|extract|grab|miner) [NC]
+    RewriteRule ^(.*)$ - [F,L]
+</IfModule>
+
+# Cabeceras de seguridad adicionales (si mod_headers está disponible)
+<IfModule mod_headers.c>
+    # X-Frame-Options
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # X-Content-Type-Options
+    Header always set X-Content-Type-Options "nosniff"
+    
+    # X-XSS-Protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # Referrer-Policy
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    
+    # Permissions-Policy
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    
+    # Strict-Transport-Security (HSTS) - Solo descomentar si se usa HTTPS
+    # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+</IfModule>
+
+# Deshabilitar Server Signature
+ServerSignature Off
+
+# ============================================================================
+# FIN DE REGLAS DE SEGURIDAD
+# ============================================================================
