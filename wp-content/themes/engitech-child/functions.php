@@ -245,8 +245,8 @@ function vertexray_whatsapp_button() {
         /* Estilos del botón flotante de WhatsApp */
         .vertexray-wa-floating {
             position: fixed;
-            bottom: 20px;
-            right: 20px;
+            bottom: 10rem;
+            right: 3rem;
             z-index: 9999;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
@@ -294,8 +294,8 @@ function vertexray_whatsapp_button() {
         /* Responsive */
         @media (max-width: 768px) {
             .vertexray-wa-floating {
-                bottom: 15px;
-                right: 15px;
+                bottom: 9rem;
+                right: 2rem;
             }
             
             .vertexray-wa-floating a {
