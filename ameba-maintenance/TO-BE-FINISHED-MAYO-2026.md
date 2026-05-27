@@ -216,9 +216,21 @@ exit
 
 
 
-#### PASO 4 — Limpieza post-deploy en producción (27/05/2026)
+#### PASO 4 — Limpieza post-deploy en producción (27/05/2026) ✅ EJECUTADO
 
-> Correr DESPUÉS de `npm run push-theme-prod`. Usar **heredoc** — evita que el shell local procese las comillas.
+> ✅ Completado el 27/05/2026. Resultados:
+> - 3 transients eliminados
+> - `default_ping_status` actualizado a `closed` (prod lo tenía open)
+> - 189 comentarios spam eliminados (IDs 9–197)
+> - 0 commentmeta huérfanos
+> - 8167 postmeta huérfanos eliminados
+> - 30 tablas optimizadas
+> - 10 opciones Site Kit eliminadas de wp_options
+> - Goolytics/WPMDB: ya limpios (0 filas)
+
+**Nota:** rsync `--delete` del `push-code-prod` elimina los archivos del plugin pero NO ejecuta el uninstall hook. Siempre limpiar wp_options/wp_usermeta manualmente después de eliminar plugins vía rsync.
+
+**Comando de referencia para próximas veces (heredoc — evita que el shell local procese las comillas):**
 
 ```bash
 ssh -o StrictHostKeyChecking=no vertexray@vertexray.ssh.wpengine.net << 'ENDSSH'
@@ -230,22 +242,17 @@ SPAM_IDS=$(wp comment list --status=spam --format=ids)
 wp db query "DELETE FROM wp_commentmeta WHERE comment_id NOT IN (SELECT comment_id FROM wp_comments)"
 wp db query "DELETE FROM wp_postmeta WHERE post_id NOT IN (SELECT ID FROM wp_posts)"
 wp db optimize
-wp plugin deactivate google-site-kit
-wp plugin delete google-site-kit
 wp cache flush
 ENDSSH
 ```
 
-**Por qué heredoc:** WP Engine SSH strip-ea las comillas dobles dentro de strings single-quoted. Con `<< 'ENDSSH'` el script llega intacto al bash remoto.
-
-**Qué hace cada parte:**
-- `wp transient delete --all` — limpia caché de transients
-- `wp option update default_comment_status/ping_status closed` — cierra comentarios/pingbacks
-- `wp comment delete $SPAM_IDS` — borra spam via WP-CLI (no SQL)
-- `wp db query DELETE ... NOT IN (...)` — orphaned meta (no hay WP-CLI nativo)
-- `wp db optimize` — optimiza tablas wp_*
-- `wp plugin delete google-site-kit` — eliminado local esta sesión (duplicaba GA)
-- `wp cache flush` — limpia object cache
+**Cleanup de opciones huérfanas por plugin eliminado vía rsync:**
+```bash
+ssh -o StrictHostKeyChecking=no vertexray@vertexray.ssh.wpengine.net << 'ENDSSH'
+wp db query "DELETE FROM wp_options WHERE option_name LIKE 'PLUGIN_PREFIX%'"
+wp db query "DELETE FROM wp_usermeta WHERE meta_key LIKE 'PLUGIN_PREFIX%'"
+ENDSSH
+```
 
 #### PASO 6 — Verificación de estabilidad post-actualización mayor (WP 7.0 + PHP 8.4)
 
