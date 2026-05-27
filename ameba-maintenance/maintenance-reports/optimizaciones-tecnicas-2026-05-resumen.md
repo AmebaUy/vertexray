@@ -124,14 +124,14 @@ wp plugin deactivate marker-io
 wp plugin delete marker-io
 ```
 
-#### Pendiente de eliminar (requiere confirmación del cliente)
+#### Eliminados: `soo-demo-importer` + `wpe-site-migration`
 
-| Plugin | Motivo | Riesgo |
+| Plugin | Motivo | Estado |
 |---|---|---|
-| `soo-demo-importer` | Solo sirve para importar demo content al instalar el tema. En producción no ejecuta nada pero es superficie de ataque innecesaria. | 🟢 Ninguno |
-| `wpe-site-migration` | Plugin de WP Engine para migraciones. Uso único, ya cumplió su función. | 🟢 Ninguno |
+| `soo-demo-importer` | Solo sirve para importar demo content al instalar el tema. Sin función en producción, superficie de ataque innecesaria. | ✅ Eliminado local + staging |
+| `wpe-site-migration` | Plugin de WP Engine para migraciones. Uso único, ya cumplió su función. | ✅ Eliminado local + staging |
 
-**Comandos cuando se apruebe:**
+**Ejecutado en:** Local + Staging (26/05/2026). **Pendiente:** Producción.
 ```bash
 wp plugin deactivate soo-demo-importer wpe-site-migration
 wp plugin delete soo-demo-importer wpe-site-migration
