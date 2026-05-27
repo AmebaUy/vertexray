@@ -107,6 +107,40 @@ Permissions-Policy: geolocation=(), microphone=(), camera=()
 
 ---
 
+### 4. Limpieza de Plugins — Mayo 26, 2026
+
+**Contexto:** Auditoría de plugins activos detectó plugins sin función en producción y uno con errores de consola recurrentes (Marker.io bloqueado por ad-blockers en cada carga).
+
+#### Eliminado: `marker-io`
+**Motivo:** El widget de Marker.io generaba dos errores de consola en cada carga de página:
+- `POST https://api.marker.io/widget/ping → ERR_BLOCKED_BY_CLIENT` (bloqueado por ad-blockers)
+- `Uncaught Error: Message could not be passed (timeout)` (cascada del bloqueo)
+
+Estos errores son falsos positivos en navegadores con extensiones, pero añaden ruido en el monitoreo de consola y contaminan QA. Marker.io es una herramienta de feedback para desarrollo — no tiene función en producción.
+
+**Ejecutado en:** Staging + Local (26/05/2026). **Pendiente:** Producción.
+```bash
+wp plugin deactivate marker-io
+wp plugin delete marker-io
+```
+
+#### Pendiente de eliminar (requiere confirmación del cliente)
+
+| Plugin | Motivo | Riesgo |
+|---|---|---|
+| `soo-demo-importer` | Solo sirve para importar demo content al instalar el tema. En producción no ejecuta nada pero es superficie de ataque innecesaria. | 🟢 Ninguno |
+| `wpe-site-migration` | Plugin de WP Engine para migraciones. Uso único, ya cumplió su función. | 🟢 Ninguno |
+
+**Comandos cuando se apruebe:**
+```bash
+wp plugin deactivate soo-demo-importer wpe-site-migration
+wp plugin delete soo-demo-importer wpe-site-migration
+```
+
+> **Nota:** `site-stack.md` no existe aún. Crear en la próxima sesión de mantenimiento mensual (FASE 5 del prompt de soporte) para documentar el inventario completo de plugins con estado actualizado.
+
+---
+
 ## 📁 ARCHIVOS MODIFICADOS/CREADOS
 
 ```
