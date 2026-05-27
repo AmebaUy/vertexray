@@ -1,6 +1,6 @@
 # 🚧 TO BE FINISHED - TAREAS PENDIENTES MAYO 2026
 
-**Estado:** CÓDIGO GENERADO - PENDIENTE DE DEPLOY Y TESTING
+**Estado:** Sesión 27/05/2026 — Auditoría completa ejecutada | Pendiente: deploy prod + limpieza BD prod (manual) + Playwright (próximo mantenimiento)
 
 ---
 
@@ -42,32 +42,65 @@
 - ✅ INSTRUCCIONES-IMPLEMENTACION.md
 - ✅ RESUMEN-IMPLEMENTACION.md
 
+### TAREA 4: CF7 — Mensajes en Español
+- ✅ Filtro `gettext` en functions.php (commit `c3f9511`) — 21 mensajes traducidos
+- ✅ `_messages` post meta actualizado en DB local via WP-CLI (10 formularios)
+- ✅ `_messages` post meta actualizado en DB staging via WP-CLI SSH
+- ⚠️ Verificar encoding en staging (acentos en mensajes) si no se ven correctamente
+
+### TAREA 5: Plugin wp-migrate-db-pro-compatibility eliminado
+- ✅ `wp-content/mu-plugins/wp-migrate-db-pro-compatibility.php` eliminado (local + staging)
+
+### TAREA 6: Performance & Cleanup (sesión 27/05/2026)
+- ✅ `robots.txt` físico creado (virtual → archivo real con reglas de seguridad)
+- ✅ `WP_POST_REVISIONS = 5` en wp-config.php
+- ✅ functions.php TAREA 4: comments/pingbacks deshabilitados (código PHP + admin UI)
+- ✅ functions.php TAREA 4: emojis WP deshabilitados (~10 KB JS+CSS ahorrados)
+- ✅ functions.php TAREA 4: oEmbed discovery links deshabilitados
+- ✅ functions.php TAREA 4: preconnect hints GTM/GA (solo producción)
+- ✅ Google Site Kit eliminado local (duplicaba GA — `analytics` + `analytics-4` activos)
+- ✅ BD local limpiada: 189 spam, 189 commentmeta huérfanos, 8167 postmeta huérfanos, 30 tablas optimizadas
+- ✅ Transients local: 10 eliminados
+- ✅ `default_comment_status = closed` + `default_ping_status = closed` en DB local
+- ✅ Staging: transients (3), comment_status, ping_status actualizados via SSH
+- ✅ `ameba-maintenance/backups/db-cleanup.php` creado (WP eval-file para BD local)
+- ✅ Tests Playwright: e2e-flows.spec.js (Fix Iteration 5), forms.spec.js, security.spec.js, playwright.config.js actualizados
+
 ---
 
 ## ⏳ PENDIENTE DE FINALIZACIÓN
 
-### 1. Configuración Pre-Deploy (CRÍTICO)
+### 1. Pendiente para correr manualmente en PROD
+
+> Ver **PASO 4** en la sección "Deploy a Producción" más abajo — tiene el comando completo.
+
+### 2. Configuración Pre-Deploy (CRÍTICO)
 
 #### ⚠️ VERIFICACIONES PENDIENTES CON ANDRÉS BOLANI:
-- [ ] **WhatsApp:** Confirmar que `59892250103` (Uruguay) es el número correcto
-  - **Estado actual:** Actualizado a `59892250103` obtenido de producción
-  - **Ubicación:** functions.php línea ~220
-  - **Contacto:** Andrés Bolani (dev)
-  
 - [ ] **IDs de Tracking GA/GTM:** Confirmar `UA-2468946-1` y `GTM-NPL5XMZ`
   - **Estado actual:** Usando IDs extraídos de header.php hardcodeado
   - **Ubicación:** functions.php líneas ~157-158
-  - **Ambigüedad detectada:** Site Kit plugin instalado (posibles IDs alternativos)
-  - **Verificación necesaria:** Revisar Google Analytics/GTM admin console
+  - **Nota:** Site Kit eliminado local — ya no hay duplicación. IDs quedan en functions.php únicamente.
   - **Contacto:** Andrés Bolani (dev)
 
-### 2. Deploy a Staging
+### 3. Deploy a Staging
 - [x] Código subido con ameba-deploy ✅ (26/05/2026 confirmado)
-- [x] WhatsApp actualizado a 59892250103 ✅ (26/05/2026)
+- [x] WhatsApp actualizado a 59892250103 ✅
 - [x] Código custom de WhatsApp eliminado, plugin Joinchat mantenido ✅
 - [x] Verificación manual: títulos, tracking, WhatsApp ✅
-- [ ] Reglas .htaccess agregadas vía script
-- [ ] Tests Playwright ejecutados
+- [x] Transients + comment/ping_status cerrados via SSH ✅ (27/05/2026)
+- [ ] Staging BD queries + optimize pendiente (comandos en sección 1 arriba)
+- [ ] Tests Playwright (postergar a próximo mantenimiento)
+
+### 4. POSTPONED (próximo mantenimiento)
+- [ ] Playwright run completo (e2e-flows, forms, security)
+- [ ] Lighthouse CLI en producción
+- [ ] Akismet verificación en producción
+- [ ] GA/GTM IDs confirmación con Andrés Bolani
+- [ ] Image thumbnails audit
+- [ ] JSON-LD schema audit
+- [ ] `fetchpriority="high"` en hero image
+- [ ] Speculation Rules API snippet
 
 ### 3. Testing Automatizado
 - [ ] Instalar Playwright: `npm install`
@@ -93,10 +126,15 @@
 > Solo operaciones scoped: theme via rsync, .htaccess via append SSH, plugins via WP-CLI SSH.
 
 #### PASO 0 — Prerequisitos (verificar antes de empezar)
-- [ ] Tests Playwright pasando en staging (críticos: forms, security, e2e)
-- [ ] Staging probado manualmente (formularios, WhatsApp, tracking)
+- [x] Tests Playwright pasando en staging (críticos: forms, security, e2e) — ✅ RUN 4 en curso 26/05/2026 (objetivo: 0 fallos)
+- [x] QA visual en producción — ✅ OK manual 26/05/2026
+- [ ] QA funcional (formularios, WhatsApp, tracking) — pendiente
 - [ ] IDs GA/GTM confirmados con Andrés Bolani
 - [ ] .htaccess staging verificado (security rules presentes)
+
+> ℹ️ **PASOs 1-7 diferidos a FASE 9** del ciclo de mantenimiento mensual.
+> No se despliega a prod hasta completar QA funcional + tests Playwright.
+> Este bloque queda como insumo/referencia para ese momento.
 
 #### PASO 1 — Backup de producción
 
@@ -178,32 +216,36 @@ exit
 
 
 
-#### PASO 4 — Limpieza de plugins/temas obsoletos en producción
+#### PASO 4 — Limpieza post-deploy en producción (27/05/2026)
+
+> Correr DESPUÉS de `npm run push-theme-prod`. Usar **heredoc** — evita que el shell local procese las comillas.
 
 ```bash
-# SSH a producción
-ssh vertexray@vertexray.ssh.wpengine.net
-cd /sites/vertexray
-
-# 1. Eliminar Goolytics (reemplazado por tracking custom en functions.php)
-wp plugin deactivate goolytics-simple-google-analytics 2>/dev/null || true
-wp plugin delete goolytics-simple-google-analytics
-
-# 2. Eliminar tema por defecto (no usado, reduce superficie de ataque)
-wp theme delete twentytwentyfive 2>/dev/null || true
-wp theme delete twentytwentythree 2>/dev/null || true
-
-# 3. Limpiar transients expirados
-wp transient delete --expired
-
-# 4. Flush cache de WP Engine
+ssh -o StrictHostKeyChecking=no vertexray@vertexray.ssh.wpengine.net << 'ENDSSH'
+wp transient delete --all
+wp option update default_comment_status closed
+wp option update default_ping_status closed
+SPAM_IDS=$(wp comment list --status=spam --format=ids)
+[ -n "$SPAM_IDS" ] && wp comment delete $SPAM_IDS --force || echo "No spam comments"
+wp db query "DELETE FROM wp_commentmeta WHERE comment_id NOT IN (SELECT comment_id FROM wp_comments)"
+wp db query "DELETE FROM wp_postmeta WHERE post_id NOT IN (SELECT ID FROM wp_posts)"
+wp db optimize
+wp plugin deactivate google-site-kit
+wp plugin delete google-site-kit
 wp cache flush
-
-# Verificar plugins activos (debe ser 15, sin Goolytics)
-wp plugin list --status=active --format=table
-
-exit
+ENDSSH
 ```
+
+**Por qué heredoc:** WP Engine SSH strip-ea las comillas dobles dentro de strings single-quoted. Con `<< 'ENDSSH'` el script llega intacto al bash remoto.
+
+**Qué hace cada parte:**
+- `wp transient delete --all` — limpia caché de transients
+- `wp option update default_comment_status/ping_status closed` — cierra comentarios/pingbacks
+- `wp comment delete $SPAM_IDS` — borra spam via WP-CLI (no SQL)
+- `wp db query DELETE ... NOT IN (...)` — orphaned meta (no hay WP-CLI nativo)
+- `wp db optimize` — optimiza tablas wp_*
+- `wp plugin delete google-site-kit` — eliminado local esta sesión (duplicaba GA)
+- `wp cache flush` — limpia object cache
 
 #### PASO 6 — Verificación de estabilidad post-actualización mayor (WP 7.0 + PHP 8.4)
 

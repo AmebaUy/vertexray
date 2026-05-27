@@ -22,7 +22,8 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  workers: process.env.CI ? 1 : 4, // 4 workers: balance entre velocidad y estabilidad en WP Engine
+  maxFailures: 20, // Detener si hay más de 20 fallos (evita que workers colgados bloqueen todo)
 
   /* Reporter */
   reporter: [

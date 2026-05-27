@@ -339,6 +339,82 @@ function vertexray_disable_author_archives() {
 }
 add_action( 'template_redirect', 'vertexray_disable_author_archives' );
 
+
+/* ============================================================================
+   TAREA 4: OPTIMIZACIÓN Y LIMPIEZA DE PERFORMANCE
+   ============================================================================ */
+
+/**
+ * 4.1 - Deshabilitar comentarios y pingbacks globalmente
+ * Vertex Ray es sitio de servicios/portfolio, sin blog activo.
+ */
+add_filter( 'comments_open', '__return_false', 20, 2 );
+add_filter( 'pings_open',    '__return_false', 20, 2 );
+
+// Eliminar cabecera X-Pingback del HTTP response
+add_filter( 'wp_headers', function( $headers ) {
+    unset( $headers['X-Pingback'] );
+    return $headers;
+} );
+
+// Ocultar menú de Comentarios en el panel de administración
+function vertexray_disable_comments_admin_ui() {
+    remove_menu_page( 'edit-comments.php' );
+    remove_submenu_page( 'options-general.php', 'options-discussion.php' );
+}
+add_action( 'admin_menu', 'vertexray_disable_comments_admin_ui' );
+
+// Quitar indicador de comentarios de la barra de admin
+add_action( 'wp_before_admin_bar_render', function() {
+    global $wp_admin_bar;
+    $wp_admin_bar->remove_menu( 'comments' );
+} );
+
+/**
+ * 4.2 - Deshabilitar script y estilos de emoji de WordPress
+ * Ahorro: ~10 KB JS + CSS + 1 DNS lookup innecesario
+ */
+remove_action( 'wp_head',                'print_emoji_detection_script', 7 );
+remove_action( 'admin_print_scripts',    'print_emoji_detection_script' );
+remove_action( 'wp_print_styles',        'print_emoji_styles' );
+remove_action( 'admin_print_styles',     'print_emoji_styles' );
+remove_filter( 'the_content_feed',       'wp_staticize_emoji' );
+remove_filter( 'comment_text_rss',       'wp_staticize_emoji' );
+remove_filter( 'wp_mail',                'wp_staticize_emoji_for_email' );
+add_filter( 'emoji_svg_url', '__return_false' );
+
+/**
+ * 4.3 - Deshabilitar oEmbed discovery links (no se usa oEmbed en el sitio)
+ */
+remove_action( 'wp_head', 'wp_oembed_add_discovery_links' );
+remove_action( 'wp_head', 'wp_oembed_add_host_js' );
+
+/**
+ * 4.4 - Preconnect a dominios de terceros críticos
+ * Solo en producción — sincronizado con vertexray_insert_google_analytics()
+ * Reduce latencia de primer request a GTM/GA en ~100-300 ms
+ */
+function vertexray_preconnect_hints() {
+    $host     = isset( $_SERVER['HTTP_HOST'] ) ? $_SERVER['HTTP_HOST'] : '';
+    $is_local = (
+        strpos( $host, 'local' )     !== false ||
+        strpos( $host, 'localhost' ) !== false ||
+        strpos( $host, '.test' )     !== false ||
+        strpos( $host, '.dev' )      !== false ||
+        strpos( $host, 'staging' )   !== false
+    );
+    if ( $is_local ) {
+        return;
+    }
+    ?>
+<link rel="preconnect" href="https://www.googletagmanager.com">
+<link rel="preconnect" href="https://www.google-analytics.com">
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
+<link rel="dns-prefetch" href="https://www.google-analytics.com">
+    <?php
+}
+add_action( 'wp_head', 'vertexray_preconnect_hints', 0 );
+
 /**
  * Remover información de versiones de plugins y temas del código fuente
  */
