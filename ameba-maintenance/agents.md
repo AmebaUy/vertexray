@@ -2,9 +2,11 @@
 
 ## Stack Tecnológico
 
-- **CMS:** WordPress 6.x
+- **CMS:** WordPress 7.0 (actualizado 26/05/2026 de v6.9.4)
+- **Database Version:** 61833
+- **PHP:** 8.4 (WP Engine)
 - **Tema:** Engitech Child (hijo de Engitech)
-- **Page Builder:** Elementor 4.0.2
+- **Page Builder:** Elementor 4.1.0 (actualizado 26/05/2026)
 - **Hosting:** WP Engine
 - **Entorno de Staging:** https://vertexraystg.wpenginepowered.com/
 - **Entorno de Producción:** https://vertexray.com
@@ -21,32 +23,44 @@
 ## Integraciones Activas
 
 ### Marketing & Analytics
-- **Google Tag Manager:** GTM-NPL5XMZ
-- **Google Analytics:** UA-2468946-1 (Universal Analytics legacy)
-- **Google Site Kit:** Instalado y activo
+- **Google Tag Manager:** GTM-NPL5XMZ (código custom en functions.php desde Mayo 2026)
+- **Google Analytics:** UA-2468946-1 (código custom en functions.php desde Mayo 2026)
+- **Google Site Kit:** v1.179.0 (actualizado 26/05/2026) ⚠️ **Verificar duplicación de tracking**
 
 ### Email & CRM
-- **SMTP:** WP Mail SMTP Pro (Gmail: abonjour@gmail.com)
-- **Formularios:** Contact Form 7 v6.1.5
-- **Anti-spam:** Cloudflare Turnstile (configurado en staging, pendiente activación en prod)
-- **Zoho Campaigns:** Pendiente de integración (bloqueado por falta de credenciales)
+- **SMTP:** WP Mail SMTP Pro v4.8.0 (Gmail: abonjour@gmail.com)
+- **Formularios:** Contact Form 7 v6.1.6 (actualizado 26/05/2026)
+- **Anti-spam:** Cloudflare Turnstile (integrado en Contact Form 7)
+- **Zoho Campaigns:** v2.1.7 - Pendiente de integración (bloqueado por falta de credenciales API)
 
 ### Respaldo & Seguridad
-- **Backups:** UpdraftPlus Premium v1.26.2
-- **Anti-spam secundario:** Akismet v5.6
+- **Backups:** UpdraftPlus Premium v1.26.4 (actualizado 26/05/2026 - parche de seguridad)
+- **Anti-spam secundario:** Akismet v5.7 (actualizado 26/05/2026)
 - **WAF:** WP Engine security layer
+- **Hardening custom:** Implementado Mayo 2026 (código PHP + .htaccess - ver site-stack)
 
-## Plugins Activos Críticos
+## Plugins Activos Críticos (Actualizado 26/05/2026)
 
-1. Elementor 4.0.2
-2. Contact Form 7 6.1.5
-3. WP Mail SMTP Pro 4.7.1
-4. Meta Box 5.11.4 (reinstalado limpiamente tras error)
-5. UpdraftPlus 1.26.2
-6. Kirki Customizer Framework 5.2.3
-7. Google Site Kit 1.176.0
-8. Goolytics 1.1.3 ⚠️ **CANDIDATO A ELIMINACIÓN**
-9. Joinchat 6.1.2 ⚠️ **CANDIDATO A ELIMINACIÓN**
+**Total:** 15 plugins activos
+
+1. **Elementor** v4.1.0 (actualizado de v4.0.2)
+2. **Contact Form 7** v6.1.6 (actualizado de v6.1.5)
+3. **WP Mail SMTP Pro** v4.8.0
+4. **Meta Box** v5.12.0 (actualizado de v5.11.4) ⚠️ **MONITOREAR** (historial de fallos en Abril)
+5. **UpdraftPlus** v1.26.4 (actualizado de v1.26.2 - security patch)
+6. **Kirki** v6.0.9 (actualizado de v5.2.3 - **MAJOR RELEASE**)
+7. **Google Site Kit** v1.179.0 (actualizado de v1.176.0)
+8. **Akismet** v5.7 (actualizado de v5.6)
+9. **Joinchat (creame-whatsapp-me)** v6.2.3 (actualizado de v6.1.3) ✅ **MANTENER** (decisión arquitectural Mayo 2026)
+10. **MC4WP Mailchimp** v4.12.6 (actualizado de v4.12.1)
+11. **Zoho Campaigns** v2.1.7
+12. **Marker.io** v1.2.2
+13. **WP Engine Site Migration** v1.8.1 (actualizado de v1.7.1)
+14. **OT Portfolios** v1.0
+15. **One Click Import Demo Content** v1.0
+
+**Plugins Eliminados:**
+- ❌ **Goolytics** v1.1.3 - Eliminado 26/05/2026, reemplazado por código custom
 
 ## Configuraciones Especiales
 

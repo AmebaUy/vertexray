@@ -1,0 +1,43 @@
+{
+  "name": "vertexray-testing",
+  "version": "2.0.0",
+  "description": "Vertex Ray - Comprehensive Testing Suite (Visual, E2E, Forms, Security)",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:debug": "playwright test --debug",
+    
+    "test:visual": "playwright test tests/visual-regression.spec.js",
+    "test:visual:update": "playwright test tests/visual-regression.spec.js --update-snapshots",
+    "test:visual:desktop": "playwright test tests/visual-regression.spec.js --project=chromium-desktop",
+    "test:visual:mobile": "playwright test tests/visual-regression.spec.js --project=chromium-mobile",
+    
+    "test:forms": "playwright test tests/forms.spec.js",
+    "test:forms:headed": "playwright test tests/forms.spec.js --headed",
+    
+    "test:e2e": "playwright test tests/e2e-flows.spec.js",
+    "test:e2e:headed": "playwright test tests/e2e-flows.spec.js --headed",
+    
+    "test:security": "playwright test tests/security.spec.js",
+    "test:security:headed": "playwright test tests/security.spec.js --headed",
+    
+    "test:critical": "playwright test tests/forms.spec.js tests/e2e-flows.spec.js tests/security.spec.js",
+    
+    "test:desktop": "playwright test --project=chromium-desktop --project=safari-desktop",
+    "test:mobile": "playwright test --project=chromium-mobile --project=safari-mobile",
+    
+    "report": "playwright show-report",
+    "codegen": "playwright codegen https://vertexraystg.wpenginepowered.com --http-credentials=\"vertexraystg:88596538\"",
+    
+    "install:browsers": "playwright install",
+    "install:deps": "playwright install-deps"
+  },
+  "keywords": ["wordpress", "testing", "playwright", "e2e", "visual-regression", "security"],
+  "author": "Ameba Creative Studio",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.40.0"
+  }
+}
