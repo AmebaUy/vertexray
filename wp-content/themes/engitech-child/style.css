@@ -21,3 +21,24 @@ footer img[src*="ClutchTop"] {
     display: block;
     margin: 0 auto;
 }
+
+/* Page-header: breadcrumbs arriba del h1, ocultar Home y página actual (active)
+   Estructura: .page-header .inner (flex) contiene h1.page-title + ul#breadcrumbs
+   La clase .inner ya es flex via .flex-middle — solo cambiamos dirección y order */
+.page-header .inner {
+    flex-direction: column;
+}
+
+.page-header h1.page-title {
+    order: 2;
+}
+
+.page-header ul#breadcrumbs {
+    order: 1;
+}
+
+/* Ocultar "Home" (primer li) y el item activo (página actual, último li) */
+.page-header #breadcrumbs li:first-child,
+.page-header #breadcrumbs li.active {
+    display: none;
+}
