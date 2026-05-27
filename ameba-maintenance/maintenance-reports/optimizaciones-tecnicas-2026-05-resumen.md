@@ -167,6 +167,113 @@ wp plugin delete soo-demo-importer wpe-site-migration
 
 ---
 
+### 6. Actualización a PHP 8.4 — Mayo 2026
+
+**Contexto:** El servidor de producción fue actualizado a PHP 8.4, la versión estable más reciente con soporte activo hasta finales de 2028.
+
+**Beneficios para el sitio:**
+
+| Área | Mejora |
+|---|---|
+| ⚡ Rendimiento | PHP 8.4 es hasta un 20% más rápido que PHP 7.x en benchmarks reales de WordPress |
+| 🔒 Seguridad | Recibe parches de seguridad hasta noviembre 2028; versiones anteriores son End of Life |
+| 🛠️ Compatibilidad | Compatible con WordPress 6.x/7.x, CF7, LiteSpeed Cache y todos los plugins activos |
+| 🧠 JIT mejorado | Compilación Just-in-Time optimizada para cargas con procesamiento intensivo |
+| 📦 Funciones nativas | Nuevas funciones nativas reemplazan código PHP externo, reduciendo dependencias |
+
+**Estado:** Sin breaking changes detectados. El sitio opera con normalidad en PHP 8.4.
+
+---
+
+### 7. Actualización a WordPress 7.0 — Mayo 27, 2026
+
+**Contexto:** WordPress lanzó la versión 7.0 (major release). Se actualizó el core de producción desde 6.9.4 a 7.0.
+
+**Beneficios:**
+- Parches de seguridad del core incluidos en la nueva versión
+- Mejoras de rendimiento interno del motor de WordPress
+- Compatibilidad extendida con el ecosistema de plugins y temas
+- Schema de base de datos actualizado a versión 61833
+
+**Ejecutado en:** Producción (27/05/2026) vía WP-CLI SSH (`wp core update && wp core update-db`). Sin errores ni breaking changes detectados.
+
+---
+
+### 8. Seguridad — Eliminación de Usuario `admin` y Transferencia de Autoría — Mayo 27, 2026
+
+**Problema detectado:** Existía un usuario con `user_login = admin` asociado al email `abonjour@gmail.com` con rol de Administrador. El nombre de usuario `admin` es el primer objetivo de ataques de fuerza bruta automatizados, ya que es el username por defecto de WordPress y está incluido en todas las listas de diccionario conocidas.
+
+**Complicación:** El usuario `admin` estaba asignado como autor de múltiples posts y páginas históricas del sitio. Eliminar el usuario sin reasignar la autoría hubiera dejado contenido huérfano.
+
+**Acciones realizadas:**
+1. **Transferencia de autoría:** Todos los posts y páginas del usuario `admin` fueron reasignados al administrador legítimo `alex` (`alex@vertexray.com`)
+2. **Eliminación del usuario:** El usuario `admin` / `abonjour@gmail.com` fue eliminado permanentemente del sitio
+
+**Resultado:**
+- ✅ El sitio ya no tiene ningún usuario con `user_login = admin`
+- ✅ Todo el contenido mantiene su autoría (ahora bajo `alex`)
+- ✅ Superficie de ataque por fuerza bruta reducida significativamente
+- ✅ El único administrador activo es `alex@vertexray.com`
+
+**Ejecutado en:** Producción (27/05/2026).
+
+---
+
+### 9. Limpieza de Base de Datos — Mayo 27, 2026
+
+**Contexto:** Las bases de datos de WordPress acumulan registros huérfanos, spam y datos obsoletos con el tiempo. Se ejecutó una limpieza completa en staging y producción.
+
+**Resultados en producción:**
+
+| Operación | Resultado |
+|---|---|
+| Transients expirados eliminados | 3 registros |
+| Comentarios spam eliminados | 189 comentarios |
+| Orphaned postmeta (registros huérfanos) | 8.167 filas eliminadas |
+| Tablas optimizadas (OPTIMIZE TABLE) | 30 tablas |
+| Estado de comentarios | Cerrados en todos los posts/páginas |
+
+**Beneficio:** Reducción del tamaño de la base de datos, menor tiempo de consulta y menor consumo de storage en el servidor.
+
+**Ejecutado en:** Staging + Producción (27/05/2026) vía WP-CLI SSH.
+
+---
+
+### 10. Optimizaciones de Configuración WordPress — Mayo 27, 2026
+
+#### A. `robots.txt` físico creado
+Reemplazo del `robots.txt` virtual generado por WordPress por un archivo físico con reglas explícitas. Bloquea el acceso de crawlers a rutas sensibles (`wp-admin`, `wp-includes`, `wp-content/plugins`, `xmlrpc.php`, `?author=`) y declara el Sitemap oficial.
+
+#### B. Límite de revisiones de posts (`WP_POST_REVISIONS = 5`)
+WordPress por defecto guarda revisiones ilimitadas de cada post. Configurado el límite en 5 revisiones por post, evitando el crecimiento descontrolado de la base de datos con el tiempo.
+
+#### C. Comentarios y pingbacks deshabilitados
+Los comentarios y pingbacks estaban habilitados globalmente pero sin uso real. Se deshabilitaron en todo el sitio:
+- Sin entrada de spam de bots de comentarios
+- Reducción de carga en la base de datos
+- Eliminación del endpoint de pingbacks (vector de DDoS)
+- Ocultación del menú de comentarios en wp-admin
+
+**Ejecutado en:** Producción (27/05/2026) vía `functions.php` y `wp-config.php`.
+
+---
+
+### 11. Formularios CF7 — Mensajes en Español — Mayo 27, 2026
+
+**Problema:** Contact Form 7 mostraba mensajes de validación y respuesta en inglés ("One or more fields have an error. Please check and try again.") a pesar de que el sitio es en español.
+
+**Causa:** CF7 usa inglés por defecto cuando WordPress no tiene un paquete de idioma activo para el plugin. Los mensajes stored en la base de datos tampoco estaban traducidos.
+
+**Solución implementada:**
+- Filtro `gettext` en `functions.php` que intercepta todas las cadenas del dominio `contact-form-7` y las devuelve en español (cubre formularios nuevos y futuros)
+- Script WP-CLI que actualizó el campo `_messages` en la base de datos de todos los formularios CF7 existentes con los textos en español
+
+**Mensajes traducidos:** validación, envío exitoso, error de envío, campo requerido, email inválido, teléfono inválido, URL inválida, fecha inválida, archivo demasiado grande, entre otros (22 mensajes en total).
+
+**Ejecutado en:** Producción (27/05/2026).
+
+---
+
 ```
 wp-content/themes/engitech-child/
 ├── functions.php                    ← ✅ CREADO (archivo principal)
