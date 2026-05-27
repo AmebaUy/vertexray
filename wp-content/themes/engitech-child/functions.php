@@ -355,6 +355,83 @@ add_filter( 'script_loader_tag', function( $html ) {
 
 
 /* ============================================================================
+   TAREA 4: MENSAJES DE CONTACT FORM 7 EN ESPAÑOL
+   ============================================================================
+   CF7 muestra sus mensajes por defecto en inglés porque WordPress está
+   configurado en locale inglés. Este filtro los reemplaza con español
+   directamente, sin depender del idioma del sitio ni de archivos .po/.mo.
+   
+   Aplica a mensajes por defecto (formularios sin mensajes personalizados en DB)
+   y también sirve como fallback. Para formularios con mensajes en DB, ver
+   el script WP-CLI: ameba-deploy/docs/cf7-messages-es.sh
+   ============================================================================ */
+
+/**
+ * Traducir mensajes de Contact Form 7 al español
+ */
+function vertexray_cf7_messages_spanish( $translated_text, $original_text, $domain ) {
+    if ( $domain !== 'contact-form-7' ) {
+        return $translated_text;
+    }
+
+    static $translations = null;
+    if ( null === $translations ) {
+        $translations = [
+            'Thank you for your message. It has been sent.'
+                => 'Gracias por tu mensaje. Ha sido enviado correctamente.',
+            'There was an error trying to send your message. Please try again later.'
+                => 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.',
+            'One or more fields have an error. Please check and try again.'
+                => 'Uno o más campos contienen errores. Por favor, revísalos e inténtalo de nuevo.',
+            'There was an error trying to send your message. Please try again later.'
+                => 'Hubo un error al enviar tu mensaje. Por favor, inténtalo de nuevo más tarde.',
+            'You must accept the terms and conditions before sending your message.'
+                => 'Debes aceptar los términos y condiciones antes de enviar tu mensaje.',
+            'The field is required.'
+                => 'Este campo es obligatorio.',
+            'The field is too long.'
+                => 'El contenido de este campo es demasiado largo.',
+            'The field is too short.'
+                => 'El contenido de este campo es demasiado corto.',
+            'There was an unknown error uploading the file.'
+                => 'Hubo un error desconocido al subir el archivo.',
+            'You are not allowed to upload files of this type.'
+                => 'No está permitido subir archivos de este tipo.',
+            'The file is too big.'
+                => 'El archivo es demasiado grande.',
+            'There was an error uploading the file.'
+                => 'Hubo un error al subir el archivo.',
+            'The date format is incorrect.'
+                => 'El formato de fecha no es válido.',
+            'The date is before the earliest one allowed.'
+                => 'La fecha es anterior al mínimo permitido.',
+            'The date is after the latest one allowed.'
+                => 'La fecha es posterior al máximo permitido.',
+            'The number format is invalid.'
+                => 'El formato del número no es válido.',
+            'The number is smaller than the minimum allowed.'
+                => 'El número es menor que el mínimo permitido.',
+            'The number is larger than the maximum allowed.'
+                => 'El número es mayor que el máximo permitido.',
+            'The answer to the quiz is incorrect.'
+                => 'La respuesta al cuestionario no es correcta.',
+            'The e-mail address entered is invalid.'
+                => 'La dirección de correo electrónico no es válida.',
+            'The URL is invalid.'
+                => 'La URL no es válida.',
+            'The telephone number is invalid.'
+                => 'El número de teléfono no es válido.',
+        ];
+    }
+
+    return isset( $translations[ $original_text ] )
+        ? $translations[ $original_text ]
+        : $translated_text;
+}
+add_filter( 'gettext', 'vertexray_cf7_messages_spanish', 10, 3 );
+
+
+/* ============================================================================
    FIN DE CONFIGURACIONES DE MANTENIMIENTO
    ============================================================================ */
 
