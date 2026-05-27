@@ -141,7 +141,31 @@ wp plugin delete soo-demo-importer wpe-site-migration
 
 ---
 
-## 📁 ARCHIVOS MODIFICADOS/CREADOS
+### 5. Actualizaciones Automáticas de Plugins — Mayo 27, 2026
+
+**Contexto:** Ningún plugin tenía habilitadas las actualizaciones automáticas en producción, lo que dejaba el sitio expuesto a vulnerabilidades conocidas entre sesiones de mantenimiento.
+
+**Solución implementada:** Habilitadas actualizaciones automáticas para los 11 plugins activos en producción vía WP-CLI.
+
+| Plugin | Auto-update |
+|---|---|
+| Akismet | ✅ on |
+| Contact Form 7 | ✅ on |
+| Elementor | ✅ on |
+| Joinchat (WhatsApp) | ✅ on |
+| Kirki | ✅ on |
+| Mailchimp for WP | ✅ on |
+| Meta Box | ✅ on |
+| OT Portfolios | ✅ on |
+| UpdraftPlus | ✅ on |
+| WP Mail SMTP Pro | ✅ on |
+| Zoho Campaigns | ✅ on |
+
+**Beneficio para el cliente:** El sitio recibirá parches de seguridad y correcciones de bugs automáticamente sin requerir intervención manual entre sesiones de mantenimiento mensual.
+
+**Ejecutado en:** Producción (27/05/2026) vía WP-CLI SSH.
+
+---
 
 ```
 wp-content/themes/engitech-child/
