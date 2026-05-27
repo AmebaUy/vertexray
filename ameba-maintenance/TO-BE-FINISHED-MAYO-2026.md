@@ -76,12 +76,12 @@
 
 ### 2. Configuración Pre-Deploy (CRÍTICO)
 
-#### ⚠️ VERIFICACIONES PENDIENTES CON ANDRÉS BOLANI:
+#### ⚠️ TAREAS PARA ANDRÉS BOLANI:
+- [ ] **Turnstile CF7 en prod:** Crear widget Cloudflare Turnstile para `vertexray.com` + `www.vertexray.com` y configurar las keys en WP Admin → Contact Form 7 → Integration → Turnstile (él tiene acceso al Cloudflare del cliente)
 - [ ] **IDs de Tracking GA/GTM:** Confirmar `UA-2468946-1` y `GTM-NPL5XMZ`
   - **Estado actual:** Usando IDs extraídos de header.php hardcodeado
   - **Ubicación:** functions.php líneas ~157-158
-  - **Nota:** Site Kit eliminado local — ya no hay duplicación. IDs quedan en functions.php únicamente.
-  - **Contacto:** Andrés Bolani (dev)
+  - **Nota:** Site Kit eliminado — ya no hay duplicación. IDs quedan en functions.php únicamente.
 
 ### 3. Deploy a Staging
 - [x] Código subido con ameba-deploy ✅ (26/05/2026 confirmado)
