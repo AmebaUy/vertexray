@@ -12,3 +12,12 @@ Template:       engitech
  
 /* =Theme customization starts here
 ------------------------------------------------------- */
+
+/* Footer: centrar imagen badge Clutch (y cualquier badge con src*="ClutchTop")
+   Problema: en páginas internas (ej. /company/join-our-team/) la imagen queda alineada
+   a la izquierda porque el widget text la trata como elemento inline dentro de <p>.
+   Solución: forzar block + margin:auto. Aplica a cualquier variante del nombre de archivo. */
+footer img[src*="ClutchTop"] {
+    display: block;
+    margin: 0 auto;
+}

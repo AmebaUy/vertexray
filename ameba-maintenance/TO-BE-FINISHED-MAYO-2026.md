@@ -88,20 +88,241 @@
 - [ ] ~~Eliminar plugins~~ (mantener instalados por seguridad, solo desactivar)
 
 ### 6. Deploy a Producción (Cuando se apruebe)
-- [ ] Merge rama `chore/mantenimiento-mayo-2026` → `dev`
-- [ ] Push a `origin/dev`
-- [ ] Deploy con: `npm run push-theme-prod engitech-child`
-- [ ] O usar Local by Flywheel "Push to Live"
-- [ ] Aplicar reglas .htaccess en producción
-- [ ] Desactivar Goolytics en producción
-- [ ] Smoke test completo en vertexray.com
+
+> ⚠️ **PRINCIPIO FUNDAMENTAL:** Nunca pisar prod con stg ni con local en bloque.
+> Solo operaciones scoped: theme via rsync, .htaccess via append SSH, plugins via WP-CLI SSH.
+
+#### PASO 0 — Prerequisitos (verificar antes de empezar)
+- [ ] Tests Playwright pasando en staging (críticos: forms, security, e2e)
+- [ ] Staging probado manualmente (formularios, WhatsApp, tracking)
+- [ ] IDs GA/GTM confirmados con Andrés Bolani
+- [ ] .htaccess staging verificado (security rules presentes)
+
+#### PASO 1 — Backup de producción
+
+```bash
+# SSH a producción
+ssh vertexray@vertexray.ssh.wpengine.net
+
+# Exportar DB (guarda en /sites/vertexray/)
+wp db export ~/backup-prod-pre-mayo2026-$(date +%Y%m%d).sql --path=/sites/vertexray
+
+# Verificar que se creó
+ls -lh ~/backup-prod-pre-mayo2026*.sql
+exit
+```
+
+> Alternativamente desde wp-admin: **UpdraftPlus → Backup Now** (incluye archivos + DB)
+
+#### PASO 2 — Deploy del child theme (SCOPED, solo engitech-child)
+
+```bash
+# Desde local, en el directorio ameba-deploy
+cd "c:\Users\mvall\Local Sites\vertexray\app\public\ameba-deploy"
+
+# Pushea SOLO wp-content/themes/engitech-child/ via rsync
+# No toca DB, plugins, uploads ni otros temas
+npm run push-theme-prod engitech-child
+```
+
+**Qué hace exactamente:**
+- `rsync -avz --delete` de `local/themes/engitech-child/` → `prod/themes/engitech-child/`
+- Excluye `.git`, `node_modules`, `*.log`
+- Solo archivos del child theme: `functions.php`, `header.php`, `style.css`, etc.
+- El flag `--delete` elimina en prod archivos que ya no existen en local (dentro del theme)
+
+#### PASO 3 — Seguridad en WP Engine (Nginx)
+
+> ⚠️ **WP Engine usa Nginx, no Apache.** Las directivas Apache del `.htaccess`
+> (`<Files>`, `Order Deny,Allow`, `Header always set`, `LimitExcept`) **no son
+> procesadas por Nginx** y no tienen efecto. El hardening real ya está cubierto
+> por `functions.php` a nivel PHP, que SÍ funciona en WP Engine.
+
+**Cobertura real de seguridad (PHP-level — funciona en WP Engine):**
+
+| Protección | Implementación | Estado |
+|------------|---------------|--------|
+| xmlrpc deshabilitado | `add_filter('xmlrpc_enabled', '__return_false')` | ✅ functions.php línea 224 |
+| REST API /users bloqueado | `add_filter('rest_endpoints', ...)` | ✅ functions.php línea 269 |
+| Security headers | `add_action('send_headers', ...)` | ✅ functions.php línea 314 |
+| DISALLOW_FILE_EDIT | `define('DISALLOW_FILE_EDIT', true)` | ✅ functions.php línea 319 |
+| Author archives bloqueados | `template_redirect` hook | ✅ functions.php línea 340 |
+| Versión WP oculta | Filtros generator meta + RSS | ✅ functions.php |
+| Errores login genéricos | Filter `login_errors` | ✅ functions.php |
+
+**Lo único que sí va en .htaccess para WP Engine (ya están en el archivo base):**
+- Las reglas de `RewriteRule` de WordPress (BEGIN WordPress / END WordPress)
+- El bloque de redirección HTTPS (si aplica)
+- El bloque `AMEBA_UPLOADS_FALLBACK` (solo en local)
+
+**No aplicar el bloque de Apache security rules** — no tiene efecto en Nginx.
+WP Engine tiene su propio WAF y bloqueos a nivel plataforma (xmlrpc, login brute force, etc.)
+
+> Si en el futuro se necesita hardening adicional a nivel servidor:
+> usar el panel de WP Engine → Security → Access Rules, o contactar soporte WPE.
+
+#### PASO 3B — Solo si el .htaccess de prod NO tiene las reglas WordPress básicas
+
+```bash
+# SSH a producción
+ssh vertexray@vertexray.ssh.wpengine.net
+
+# Verificar estado actual
+wc -l ~/sites/vertexray/.htaccess
+grep -c "BEGIN WordPress" ~/sites/vertexray/.htaccess 2>/dev/null || echo "Bloque WordPress NO presente"
+
+# Si todo está bien (tiene BEGIN WordPress), no tocar nada
+# El .htaccess en WP Engine solo necesita el bloque WordPress estándar
+exit
+```
+
+
+
+#### PASO 4 — Limpieza de plugins/temas obsoletos en producción
+
+```bash
+# SSH a producción
+ssh vertexray@vertexray.ssh.wpengine.net
+cd /sites/vertexray
+
+# 1. Eliminar Goolytics (reemplazado por tracking custom en functions.php)
+wp plugin deactivate goolytics-simple-google-analytics 2>/dev/null || true
+wp plugin delete goolytics-simple-google-analytics
+
+# 2. Eliminar tema por defecto (no usado, reduce superficie de ataque)
+wp theme delete twentytwentyfive 2>/dev/null || true
+wp theme delete twentytwentythree 2>/dev/null || true
+
+# 3. Limpiar transients expirados
+wp transient delete --expired
+
+# 4. Flush cache de WP Engine
+wp cache flush
+
+# Verificar plugins activos (debe ser 15, sin Goolytics)
+wp plugin list --status=active --format=table
+
+exit
+```
+
+#### PASO 6 — Verificación de estabilidad post-actualización mayor (WP 7.0 + PHP 8.4)
+
+> Ejecutar **siempre** después de updates mayores (WP Core, Meta Box, Elementor, Kirki).
+> El script y el protocolo QA fueron generados el 26/05/2026 para la actualización WP 7.0.
+
+##### 6A — Script automático `verify-env.php`
+
+El script vive en la raíz del proyecto (`verify-env.php`) y se ejecuta via WP-CLI.
+Cubre: CPT ot_portfolio + postmeta integridad, compatibilidad PHP 8.4 en plugins sin actualizar,
+error logs recientes, estado OAuth de Zoho Campaigns.
+
+```bash
+# Subir a staging
+scp "c:/Users/mvall/Local Sites/vertexray/app/public/verify-env.php" \
+    vertexraystg@vertexraystg.ssh.wpengine.net:~/sites/vertexraystg/
+
+# Ejecutar en staging
+ssh vertexraystg@vertexraystg.ssh.wpengine.net \
+  "cd ~/sites/vertexraystg && wp eval-file verify-env.php"
+
+# Ejecutar en producción (solo si staging fue limpio)
+scp "c:/Users/mvall/Local Sites/vertexray/app/public/verify-env.php" \
+    vertexray@vertexray.ssh.wpengine.net:~/sites/vertexray/
+
+ssh vertexray@vertexray.ssh.wpengine.net \
+  "cd ~/sites/vertexray && wp eval-file verify-env.php"
+
+# BORRAR el script al terminar (no dejar expuesto)
+ssh vertexraystg@vertexraystg.ssh.wpengine.net "rm ~/sites/vertexraystg/verify-env.php"
+ssh vertexray@vertexray.ssh.wpengine.net "rm ~/sites/vertexray/verify-env.php"
+```
+
+**Output esperado (sin issues):**
+- `✓ CPT 'ot_portfolio' registrado correctamente`
+- `✓ Meta Box 5.12.0+ (actualizado correctamente)`
+- `✓ Sin postmeta huérfanos detectados`
+- `✓ soo-demo-importer — sin patrones deprecated`
+- `✓ ot_portfolio — sin patrones deprecated`
+- `✓ access_token: SET (xxx chars)` (Zoho autenticado)
+- `✓ Sin flag de error de conexión`
+
+**Si reporta `✗` o `⚠`:** Compartir output completo en el próximo ciclo de soporte.
+
+##### 6B — Protocolo QA Visual en Navegador (F12 DevTools)
+
+Páginas a revisar: Home `/`, Projects, Contact Us, Join Our Team.
+
+**Meta Box 5.12 + Gutenberg — Console tab:**
+Errores que delatan incompatibilidad con React de Gutenberg:
+- `Invalid hook call. Hooks can only be called inside of the body of a function component` → dos versiones de React colisionando
+- `Warning: ReactDOM.render is no longer supported in React 18` → Meta Box usa API vieja
+- `TypeError: wp.element.createElement is not a function` → order de dependencias roto
+
+Trigger: Abrir cualquier `ot_portfolio` en editor Gutenberg y revisar Console.
+
+**Kirki 6.0.9 — Elements tab:**
+1. F12 → Elements → buscar en `<head>` un `<style id="kirki-customizer-styles">` o similar.
+2. Verificar que contiene variables del tema Engitech: `--primary-color`, `--body-font-family`, etc.
+3. Si el `<style>` está vacío o ausente → Kirki 6 rompió la inyección de variables CSS.
+4. En el inspector de estilos de un `<h1>`: verificar que `font-family` y `color` vienen de selector de Kirki, no del default del browser.
+
+**Elementor 4.1.0 — Console + Network:**
+- Console: `elementorFrontend.hooks is not defined` → Elementor no inicializó correctamente
+- Network → JS → verificar `elementor-frontend.min.js` carga con status 200 (no 404)
+- Si 404 → limpiar caché LiteSpeed + `Elementor → Herramientas → Regenerar Archivos CSS`
+
+**Cloudflare Turnstile + CF7 6.1.6 — Network tab:**
+1. F12 → Network → activar **Preserve log**.
+2. Completar y enviar el formulario de contacto.
+3. Filtrar por `feedback` → click en `POST .../contact-forms/{ID}/feedback`.
+4. **Payload tab:** buscar campo `_wpcf7_turnstile_response` con valor tipo `"0.AbCd..."` (~800 chars). Si está vacío → Turnstile no resolvió antes del submit.
+5. **Response tab (JSON esperado):** `{"status":"mail_sent","message":"Tu mensaje ha sido enviado..."}`.
+   - `validation_failed` con `_wpcf7_turnstile_response` → token vacío o inválido
+   - `spam` → Turnstile keys de prod/stg mezcladas (verificar en CF7 → Integración)
+   - `mail_failed` → problema SMTP, no de Turnstile
+
+**Borde naranja en CF7:** Widget Turnstile no completó el challenge. Causas: timeout, modo Invisible vs. Managed mal configurado, o adblocker bloqueó `challenges.cloudflare.com`.
+
+
+
+Verificar manualmente en https://www.vertexray.com/:
+
+```bash
+# Tests rápidos desde terminal (reemplazar con credenciales si hay auth básica en prod)
+PROD="https://www.vertexray.com"
+
+# 1. Sitio responde
+curl -s -o /dev/null -w "Home HTTP: %{http_code}\n" "$PROD/"
+
+# 2. Archivos sensibles bloqueados
+curl -s -o /dev/null -w "xmlrpc.php (debe 403): %{http_code}\n" "$PROD/xmlrpc.php"
+curl -s -o /dev/null -w "readme.html (debe 403): %{http_code}\n" "$PROD/readme.html"
+curl -s -o /dev/null -w "wp-config (debe 403): %{http_code}\n" "$PROD/wp-config.php"
+
+# 3. REST API /users bloqueado
+curl -s -o /dev/null -w "REST users (debe 401): %{http_code}\n" "$PROD/wp-json/wp/v2/users"
+
+# 4. Security headers presentes
+curl -s -I "$PROD/" | grep -i "x-frame-options\|x-content-type\|referrer-policy"
+```
+
+**Verificación manual en navegador:**
+- [ ] Home carga sin errores de JS/CSS
+- [ ] Título: "Vertex Ray – Creating Experience" (sin "Engitech")
+- [ ] Botón WhatsApp visible → abre wa.me/59892250103
+- [ ] Formulario Contact Us funciona (enviar test)
+- [ ] DevTools → Console → sin errores
+- [ ] DevTools → Network → `gtm.js` y `analytics.js` presentes
+- [ ] DevTools → Console → `dataLayer` con datos
 
 ### 7. Post-Deploy
 - [ ] Forzar reindexación en Google Search Console
-- [ ] Verificar títulos en resultados de búsqueda (puede tardar días)
-- [ ] Monitorear Analytics por 48h
+  - URL Inspection → Design, Projects, Contact Us, Join Our Team → Request Indexing
+- [ ] Verificar títulos en resultados de búsqueda (puede tardar 2-7 días)
+- [ ] Monitorear Analytics por 48h (Google Analytics Real Time)
 - [ ] Confirmar WhatsApp funcionando en prod
-- [ ] Backup final con UpdraftPlus
+- [ ] Backup final con UpdraftPlus post-deploy
+- [ ] Commit y push de cualquier ajuste final
 
 ---
 
